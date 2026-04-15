@@ -1,0 +1,16 @@
+[Unit]
+Description=SoberFuture Build Bot (Slack Socket Mode)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/arnieai/soberfuture/SoberFuture/services/mcp-slack
+ExecStart=/home/arnieai/soberfuture/SoberFuture/services/mcp-slack/.venv/bin/python3 app.py
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/arnieai/soberfuture/SoberFuture/.env.local
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

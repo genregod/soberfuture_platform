@@ -1,0 +1,90 @@
+{
+  "registry_version": "1.0.0",
+  "updated": "2026-04-12",
+  "servers": [
+    {
+      "name": "mcp-slack",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "active",
+      "capabilities": ["send_message", "approval_request", "mention_response", "action_handler"],
+      "auth": "SLACK_BOT_TOKEN + SLACK_SIGNING_SECRET + SLACK_APP_TOKEN",
+      "transport": "socket_mode",
+      "entry": "services/mcp-slack/app.py",
+      "health": "health()",
+      "last_validated": "2026-04-12"
+    },
+    {
+      "name": "mcp-github",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["list_prs", "list_issues", "post_comment", "get_repo"],
+      "auth": "GITHUB_TOKEN",
+      "transport": "https",
+      "entry": "services/mcp-github/app.py",
+      "health": "health()",
+      "last_validated": null
+    },
+    {
+      "name": "mcp-browser",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["navigate", "screenshot", "dom_capture"],
+      "auth": "none",
+      "transport": "local",
+      "entry": "services/mcp-browser/app.py",
+      "health": "health()",
+      "last_validated": null
+    },
+    {
+      "name": "mcp-aws-docs",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["fetch_service_overview"],
+      "auth": "none",
+      "transport": "https",
+      "entry": "services/mcp-aws-docs/app.py",
+      "health": "health()",
+      "last_validated": null
+    },
+    {
+      "name": "mcp-repo-context",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["list_files", "grep", "read_file"],
+      "auth": "none",
+      "transport": "local",
+      "entry": "services/mcp-repo-context/app.py",
+      "health": "health()",
+      "last_validated": null
+    },
+    {
+      "name": "mcp-package-docs",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["pypi_info", "npm_info"],
+      "auth": "none",
+      "transport": "https",
+      "entry": "services/mcp-package-docs/app.py",
+      "health": "health()",
+      "last_validated": null
+    },
+    {
+      "name": "mcp-adr",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "scaffolded",
+      "capabilities": ["list_adrs", "get_adr"],
+      "auth": "none",
+      "transport": "local",
+      "entry": "services/mcp-adr/app.py",
+      "health": "health()",
+      "last_validated": null
+    }
+  ]
+}
