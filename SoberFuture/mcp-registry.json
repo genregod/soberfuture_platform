@@ -18,13 +18,13 @@
       "name": "mcp-github",
       "version": "0.1.0",
       "owner": "platform",
-      "status": "scaffolded",
+      "status": "active",
       "capabilities": ["list_prs", "list_issues", "post_comment", "get_repo"],
       "auth": "GITHUB_TOKEN",
       "transport": "https",
       "entry": "services/mcp-github/app.py",
       "health": "health()",
-      "last_validated": null
+      "last_validated": "2026-04-15"
     },
     {
       "name": "mcp-browser",
