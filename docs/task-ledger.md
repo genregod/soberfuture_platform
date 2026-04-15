@@ -123,22 +123,17 @@ NEXT: <next bounded task>
 ---
 
 ### T-009: Initialize GitHub repo and push
-**STATUS:** not started
+**STATUS:** complete
 **PHASE:** 4
-**APPROVAL NEEDED:** YES — external action
-**ARTIFACTS:** GitHub repo URL
-**BLOCKERS:** Needs GITHUB_TOKEN and repo name confirmation
-**NEXT:** T-010
+**ARTIFACTS:** https://github.com/genregod/soberfuture_platform
+**NOTES:** main + develop branches, branch protection on main, 53 files pushed
 
 ---
 
 ### T-010: Bootstrap web app (Next.js)
-**STATUS:** not started
+**STATUS:** complete
 **PHASE:** 6
-**APPROVAL NEEDED:** no
-**ARTIFACTS:** apps/web/
-**BLOCKERS:** T-009 (GitHub repo) preferred first
-**NEXT:** T-011
+**ARTIFACTS:** apps/web/ — Next.js 15, TypeScript, Tailwind v4, App Router, typecheck clean
 
 ---
 
