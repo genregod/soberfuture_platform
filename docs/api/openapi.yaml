@@ -1,0 +1,404 @@
+openapi: "3.1.0"
+info:
+  title: SoberFuture API
+  version: "0.1.0"
+  description: |
+    Core backend API for SoberFuture.me — recovery journal and clinician support platform.
+    All endpoints require authentication unless marked public.
+    All user content is treated as sensitive. Encryption in transit (TLS) required.
+  contact:
+    name: SoberFuture Platform Team
+    email: realgenregod@gmail.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.soberfuture.me
+    description: Production (not yet provisioned)
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object }
+
+    UserProfile:
+      type: object
+      required: [id, name, email, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        timezone: { type: string }
+        sober_date: { type: string, format: date, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    JournalEntry:
+      type: object
+      required: [id, user_id, mood, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        mood: { type: integer, minimum: 1, maximum: 5, description: "1=very low, 5=very high" }
+        body: { type: string, nullable: true }
+        prompt_id: { type: string, nullable: true }
+        media_urls: { type: array, items: { type: string, format: uri } }
+        ai_reflection: { type: string, nullable: true, description: "AI-generated reflection — never diagnosis" }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    JournalEntryCreate:
+      type: object
+      required: [mood]
+      properties:
+        mood: { type: integer, minimum: 1, maximum: 5 }
+        body: { type: string, maxLength: 10000 }
+        prompt_id: { type: string }
+
+    Milestone:
+      type: object
+      required: [id, user_id, type, achieved_at]
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        type: { type: string, enum: [days_1, days_7, days_30, days_90, days_180, days_365, custom] }
+        label: { type: string }
+        achieved_at: { type: string, format: date-time }
+        shareable_card_url: { type: string, format: uri, nullable: true }
+
+    Resource:
+      type: object
+      required: [id, name, category, lat, lng]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        category: { type: string, enum: [treatment, counseling, housing, food, legal, peer_support, other] }
+        address: { type: string }
+        phone: { type: string, nullable: true }
+        website: { type: string, format: uri, nullable: true }
+        lat: { type: number, format: double }
+        lng: { type: number, format: double }
+        distance_miles: { type: number, nullable: true }
+        hours: { type: string, nullable: true }
+
+    Meeting:
+      type: object
+      required: [id, name, type, day_of_week, time, lat, lng]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        type: { type: string, enum: [AA, NA, CA, SMART, Refuge, other] }
+        day_of_week: { type: integer, minimum: 0, maximum: 6 }
+        time: { type: string, pattern: "^[0-2][0-9]:[0-5][0-9]$" }
+        address: { type: string }
+        lat: { type: number, format: double }
+        lng: { type: number, format: double }
+        distance_miles: { type: number, nullable: true }
+        online_url: { type: string, format: uri, nullable: true }
+        notes: { type: string, nullable: true }
+
+    ClinicalNote:
+      type: object
+      required: [id, clinician_id, patient_id, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        clinician_id: { type: string, format: uuid }
+        patient_id: { type: string, format: uuid }
+        body: { type: string }
+        visibility: { type: string, enum: [clinician_only, shared_with_patient] }
+        created_at: { type: string, format: date-time }
+
+    Pagination:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        per_page: { type: integer }
+        has_next: { type: boolean }
+
+paths:
+  /health:
+    get:
+      operationId: health_check
+      summary: Health check
+      security: []
+      tags: [system]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  version: { type: string }
+
+  /auth/signup:
+    post:
+      operationId: auth_signup
+      summary: Create account
+      security: []
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 100 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string }
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/login:
+    post:
+      operationId: auth_login
+      summary: Sign in
+      security: []
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /me:
+    get:
+      operationId: get_profile
+      summary: Get current user profile
+      tags: [users]
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserProfile" }
+
+  /journal/entries:
+    get:
+      operationId: list_journal_entries
+      summary: List journal entries (newest first)
+      tags: [journal]
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+      responses:
+        "200":
+          description: Entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/JournalEntry" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+    post:
+      operationId: create_journal_entry
+      summary: Create journal entry
+      tags: [journal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/JournalEntryCreate" }
+      responses:
+        "201":
+          description: Entry created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/JournalEntry" }
+
+  /journal/entries/{entry_id}:
+    get:
+      operationId: get_journal_entry
+      summary: Get single journal entry
+      tags: [journal]
+      parameters:
+        - name: entry_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/JournalEntry" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /milestones:
+    get:
+      operationId: list_milestones
+      summary: List user milestones
+      tags: [milestones]
+      responses:
+        "200":
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Milestone" }
+
+  /resources:
+    get:
+      operationId: search_resources
+      summary: Search recovery resources by location
+      tags: [resources]
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lng
+          in: query
+          required: true
+          schema: { type: number }
+        - name: radius_miles
+          in: query
+          schema: { type: number, default: 10, maximum: 50 }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Resource" }
+
+  /meetings:
+    get:
+      operationId: search_meetings
+      summary: Search meetings by location and type
+      tags: [meetings]
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lng
+          in: query
+          required: true
+          schema: { type: number }
+        - name: radius_miles
+          in: query
+          schema: { type: number, default: 10, maximum: 50 }
+        - name: type
+          in: query
+          schema: { type: string, enum: [AA, NA, CA, SMART, Refuge, other] }
+        - name: day_of_week
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 6 }
+      responses:
+        "200":
+          description: Meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Meeting" }
+
+  /clinician/patients:
+    get:
+      operationId: list_patients
+      summary: List clinician's patients
+      tags: [clinician]
+      responses:
+        "200":
+          description: Patients
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/UserProfile" }
+
+  /clinician/patients/{patient_id}/notes:
+    post:
+      operationId: create_clinical_note
+      summary: Create clinical note for patient
+      tags: [clinician]
+      parameters:
+        - name: patient_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body, visibility]
+              properties:
+                body: { type: string }
+                visibility: { type: string, enum: [clinician_only, shared_with_patient] }
+      responses:
+        "201":
+          description: Note created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClinicalNote" }

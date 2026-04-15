@@ -1,0 +1,169 @@
+{
+  "mcpServers": {
+    "filesystem_repo": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/arnieai/soberfuture"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": ["read_file", "list_directory", "search_files", "get_file_info"],
+      "disabledTools": ["write_file", "edit_file", "move_file", "create_directory", "delete_file"]
+    },
+
+    "github_ro": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "disabled": false,
+      "autoApprove": ["get_repository", "list_issues", "list_pull_requests", "get_file_contents", "search_repositories"],
+      "disabledTools": ["create_issue", "create_pull_request", "push_files", "create_repository", "fork_repository"]
+    },
+
+    "fetch_docs": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": ["fetch"],
+      "disabledTools": []
+    },
+
+    "bravesearch_docs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": []
+    },
+
+    "local_rag": {
+      "command": "npx",
+      "args": ["-y", "mcp-local-rag"],
+      "env": {
+        "BASE_DIR": "/home/arnieai/soberfuture/docs"
+      },
+      "disabled": false,
+      "autoApprove": ["query", "list_documents"],
+      "disabledTools": []
+    },
+
+    "playwright_ui": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--headless"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": ["browser_navigate", "browser_screenshot", "browser_snapshot"],
+      "disabledTools": []
+    },
+
+    "openapi_contracts": {
+      "command": "uvx",
+      "args": ["awslabs.openapi-mcp-server@latest"],
+      "env": {
+        "API_SPEC_PATH": "/home/arnieai/soberfuture/docs/api/openapi.yaml"
+      },
+      "disabled": false,
+      "autoApprove": ["list_operations", "get_operation", "get_schema"],
+      "disabledTools": []
+    },
+
+    "aws_docs": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["search_documentation", "read_documentation"],
+      "disabledTools": []
+    },
+
+    "terraform_iac": {
+      "command": "npx",
+      "args": ["-y", "@hashicorp/terraform-mcp-server"],
+      "env": {
+        "ENABLE_TF_OPERATIONS": "false"
+      },
+      "disabled": false,
+      "autoApprove": ["resolveProviderDocID", "getProviderDocs"],
+      "disabledTools": ["apply", "destroy", "init", "plan"]
+    },
+
+    "slack_approvals": {
+      "url": "https://mcp.slack.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${SLACK_BOT_TOKEN}"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": ["chat_postMessage", "chat_update", "chat_delete"]
+    },
+
+    "aws_location": {
+      "command": "uvx",
+      "args": ["awslabs.aws-location-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "AWS_PROFILE": "default"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": []
+    },
+
+    "mapbox_geo": {
+      "command": "npx",
+      "args": ["-y", "@mapbox/mcp-server"],
+      "env": {
+        "MAPBOX_ACCESS_TOKEN": "${MAPBOX_ACCESS_TOKEN}"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": []
+    },
+
+    "bedrock_data_automation": {
+      "command": "uvx",
+      "args": ["awslabs.aws-bedrock-data-automation-mcp-server@latest"],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "AWS_BUCKET_NAME": "soberfuture-dev-artifacts"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": []
+    },
+
+    "aws_api_mutation": {
+      "command": "uvx",
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "READ_OPERATIONS_ONLY": "true",
+        "AWS_API_MCP_ALLOW_UNRESTRICTED_LOCAL_FILE_ACCESS": "no-access"
+      },
+      "disabled": true,
+      "autoApprove": [],
+      "disabledTools": []
+    },
+
+    "soberfuture_mcp": {
+      "url": "http://52.54.162.129:8100",
+      "headers": {
+        "X-API-Key": "${MCP_GATEWAY_API_KEY}"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "health", "list_servers",
+        "search_meetings", "get_meeting", "list_meeting_sources",
+        "search_resources", "get_resource",
+        "get_journal_prompts", "analyze_entry",
+        "get_user_streak", "get_milestones"
+      ],
+      "disabledTools": []
+    }
+  }
+}
